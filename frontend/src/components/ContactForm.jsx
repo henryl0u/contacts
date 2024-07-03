@@ -1,41 +1,44 @@
 import { useState } from "react";
 
-const ContactForm = ({}) => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+const ContactForm = ({ contact = {}, updateCallback }) => {
+  const [firstName, setFirstName] = useState(contact.firstName || "");
+  const [lastName, setLastName] = useState(contact.lastName || "");
+  const [email, setEmail] = useState(contact.email || "");
+  const [phoneNumber, setPhoneNumber] = useState(contact.phoneNumber || "");
+
+  const updating = Object.entries(contact).length !== 0;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const data = {
-        firstName,
-        lastName,
-        email,
-        phoneNumber,
-        };
-    const url = "http://127.0.0.1:5000/create_contact";
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+    };
+    const url =
+      "http://127.0.0.1:5000/" +
+      (updating ? `update_contact/${contact.id}` : "create_contact");
     const options = {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
+      method: updating ? "PATCH" : "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
     };
     const response = await fetch(url, options);
-    if (response.status !== 201 || response.status !== 200) {
-        const data = await response.json();
-        alert(data.message);
+    if (response.status !== 201 && response.status !== 200) {
+      const data = await response.json();
+      alert(data.message);
     } else {
-        alert("Contact added successfully");
+      updateCallback();
     }
-    }
-
+  };
 
   return (
     <form onSubmit={handleSubmit}>
       <div>
-        <label htmlFor="firstName">First Name:</label>
+        <label htmlFor="firstName">First Name: </label>
         <input
           type="text"
           id="firstName"
@@ -44,7 +47,7 @@ const ContactForm = ({}) => {
         />
       </div>
       <div>
-        <label htmlFor="lastName">Last Name:</label>
+        <label htmlFor="lastName">Last Name: </label>
         <input
           type="text"
           id="lastName"
@@ -53,7 +56,7 @@ const ContactForm = ({}) => {
         />
       </div>
       <div>
-        <label htmlFor="email">Email:</label>
+        <label htmlFor="email">Email: </label>
         <input
           type="email"
           id="email"
@@ -62,7 +65,7 @@ const ContactForm = ({}) => {
         />
       </div>
       <div>
-        <label htmlFor="phoneNumber">Phone Number:</label>
+        <label htmlFor="phoneNumber">Phone Number: </label>
         <input
           type="tel"
           id="phoneNumber"
@@ -70,7 +73,7 @@ const ContactForm = ({}) => {
           onChange={(e) => setPhoneNumber(e.target.value)}
         />
       </div>
-      <button type="submit">Add Contact</button>
+      <button type="submit"> {updating ? "Save" : "Create Contact"}</button>
     </form>
   );
 };

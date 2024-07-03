@@ -1,7 +1,26 @@
 import React from "react";
 
-const ContactList = ({ contacts }) => {
+const ContactList = ({ contacts, updateContact, updateCallback }) => {
+  const onDelete = async (id) => {
+    try {
+      const url = `http://127.0.0.1:5000/delete_contact/${id}`;
+      const options = {
+        method: "DELETE",
+      };
+      const response = await fetch(url, options);
+      if (response.status === 200) {
+        updateCallback();
+      } else {
+        const data = await response.json();
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error("An error occurred", error);
+    }
+  };
+
   return (
+    contacts.length === 0 ? <h1>No contacts found</h1> :
     <div>
       <h1>Contacts</h1>
       <table>
@@ -22,8 +41,8 @@ const ContactList = ({ contacts }) => {
               <td>{contact.email}</td>
               <td>{contact.phoneNumber}</td>
               <td>
-                <button>Edit</button>
-                <button>Delete</button>
+                <button onClick={() => updateContact(contact)}>Edit</button>
+                <button onClick={() => onDelete(contact.id)}>Delete</button>
               </td>
             </tr>
           ))}
